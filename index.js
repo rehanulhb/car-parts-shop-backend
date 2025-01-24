@@ -29,6 +29,13 @@ const client = new MongoClient(uri, {
   }
 });
 
+//middleware
+const logger = async(req, res, next) =>{
+  console.log('Called', req.host, req.originalUrl);
+  next();
+} 
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -38,7 +45,7 @@ async function run() {
     const bookingCollection = client.db('carShop').collection('bookings')
 
     //Auth API
-    app.post('/jwt', async(req, res)=>{
+    app.post('/jwt', logger,  async(req, res)=>{
       const user = req.body;
       console.log(user);
       const token =jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
@@ -54,7 +61,7 @@ async function run() {
     })
 
     //Service API
-    app.get('/services', async(req, res) => {
+    app.get('/services', logger,  async(req, res) => {
         const cursor = serviceCollection.find();
         const result = await cursor.toArray();
         res.send(result)
@@ -72,7 +79,7 @@ async function run() {
 
     //Bookings
 
-    app.get('/bookings',async(req, res)=>{
+    app.get('/bookings',logger, async(req, res)=>{
       console.log(req.query.email);
       console.log('Tok tok token', req.cookies.token)
         let query = {}
