@@ -36,6 +36,28 @@ const logger = async(req, res, next) =>{
 } 
 
 
+const verifyToken = async(req, res, next)=>{
+  const token = req.cookies?.token;
+  console.log('Value of Token in Middleware', token)
+  if(!token){
+    return res.status(401).send({message: 'Not Authorized'})
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded)=>{
+    //error
+    if(err){
+      console.log(err)
+      return res.status(401).send({message: 'Unauhorized'})
+    }
+
+    //if token is valid then it would be decoded
+    console.log('Value in the Token', decoded)
+    req.user = decoded;
+    next();
+  })
+  
+}
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -79,9 +101,10 @@ async function run() {
 
     //Bookings
 
-    app.get('/bookings',logger, async(req, res)=>{
+    app.get('/bookings',logger,verifyToken, async(req, res)=>{
       console.log(req.query.email);
-      console.log('Tok tok token', req.cookies.token)
+      //console.log('Tok tok token', req.cookies.token)
+      console.log('User in the valid token', req.user)
         let query = {}
         if(req.query?.email){
           query = {email: req.query.email}
