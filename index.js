@@ -105,6 +105,11 @@ async function run() {
       console.log(req.query.email);
       //console.log('Tok tok token', req.cookies.token)
       console.log('User in the valid token', req.user)
+
+        if(req.query.email !== req.user.email){
+          return res.status(403).send({message: 'forbidden Access'})
+        }
+
         let query = {}
         if(req.query?.email){
           query = {email: req.query.email}
